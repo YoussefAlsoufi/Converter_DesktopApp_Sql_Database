@@ -1,0 +1,9 @@
+﻿<Application x:Class="Converter_DesktopApp_Sql_Database.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Converter_DesktopApp_Sql_Database"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
