@@ -13,11 +13,12 @@ using System.Data;
 
 namespace Converter_DesktopApp_Sql_Database
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        List<UnitCategoriesParams> CategoriesList = new();
+        List<UnitParameters> UnitsList = new();
+        
+
         public NameValueCollection lengthSection, dataTypeSection, tempretureSection;
         string currentCobValue = "";
         string fromCobCurrentValue = "";
@@ -27,9 +28,76 @@ namespace Converter_DesktopApp_Sql_Database
         {
             InitializeComponent();
             Cob_Units.SelectedIndex = 0;
+            Reader();
+
+        }
+
+        public void Reader()
+        {
+            SqlConnection connection = MyConnection.TestGetConnection();
+            connection.Open();
+            SqlCommand Categories = new ("select * from dbo.tb_UnitCategories; ", connection);
+            SqlDataReader ComboCategories = Categories.ExecuteReader();
+
+            while (ComboCategories.Read())
+            {
+                ComboTest.Items.Add(ComboCategories["Cate_Name"]);
+                CategoriesList.Add(new UnitCategoriesParams()
+                {
+                    CateId = ComboCategories["Cate_Id"] as string,
+                    CateName = ComboCategories["Cate_Name"] as string
+                });
+            }
+            connection.Close();
+
+
+            connection.Open();
+            SqlCommand Units = new ("select * from dbo.tb_Units;", connection);
+            SqlDataReader ComboUnits = Units.ExecuteReader();
+
+            while (ComboUnits.Read())
+            {
+                UnitsList.Add(new UnitParameters()
+                {
+                    UnitId = (int)ComboUnits["Unit_Id"],
+                    UnitName = ComboUnits["Unit_Name"] as string ,
+                    CateId = ComboUnits["Cate_Id"] as string
+                });
+            }
+
+            connection.Close();
+
+
+
+            /*
+            SqlConnection connection = MyConnection.GetConnection();
+            connection.Open();
+            SqlCommand command = new ("select * from [dbo].[Length]", connection);
+            command.CommandType = CommandType.Text;
+
+            SqlDataAdapter adapter = new (command);
+            _ = adapter.Fill(dt);
+
+            DataRow newRow = dt.NewRow();
+            newRow["LengthId"] = 0;
+            newRow["Unit_Name"] = "meter";
+            dt.Rows.InsertAt(newRow, 0);
+            connection.Close();
+            var test = dt.Rows;
+            var test1 = dt.Columns;
+            var tes = dt.PrimaryKey;
+            Console.WriteLine(dt.Rows.Count);
+            */
+
+
+        }
+        private string[] GetUnitByCategory (string cateId)
+        {
+            return UnitsList.Where(cate => cate.CateId == cateId).Select(UnitName => UnitName.UnitName).ToArray();
         }
         private void Cob_Units_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
             currentValue = (e.AddedItems[0] as ComboBoxItem).Content as string;
             if (currentCobValue != currentValue)
             {
@@ -37,6 +105,9 @@ namespace Converter_DesktopApp_Sql_Database
                 UpdateValues();
 
             }
+            
+            
+
         }
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -144,7 +215,20 @@ namespace Converter_DesktopApp_Sql_Database
             }
 
         }
+        private void ComboBoxTest(object sender, SelectionChangedEventArgs e)
+        {
+            ComboTest2.Items.Clear();
+            string cateId = CategoriesList[ComboTest.SelectedIndex].CateId;
+            foreach (string UnitName in GetUnitByCategory(cateId))
+            {
+                ComboTest2.Items.Add(UnitName);
+            }
 
+        }
+        private void ComboBoxTest2(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
         public void UpdateValues()
         {
             switch (currentCobValue)

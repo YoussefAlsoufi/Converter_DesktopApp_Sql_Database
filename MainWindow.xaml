@@ -26,7 +26,9 @@
                     <RowDefinition Height="100"></RowDefinition>
                     <RowDefinition Height="160"></RowDefinition>
                     <RowDefinition Height="100"></RowDefinition>
-                    <RowDefinition Height="300"></RowDefinition>
+                    <RowDefinition Height="72.54"></RowDefinition>
+                    <RowDefinition Height="32.568"/>
+                    <RowDefinition Height="194.892"/>
                 </Grid.RowDefinitions>
 
 
@@ -138,9 +140,16 @@
                     </TextBox>
 
                 </StackPanel>
-                <StackPanel Grid.Row="4" Width="300" Grid.Column="2" Margin="209,0,301,0">
-                    <Image   Grid.Row="4" Width="200" Height="130" Source="/Images/converter.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                
+                <StackPanel Grid.Row="4" Grid.RowSpan="3" Grid.Column="2">
+                    <Image   Grid.Row="4" Width="372" Height="130" Source="/Images/converter.png" HorizontalAlignment="Center"/>
+                    <ComboBox x:Name="ComboTest" FontSize="20" Width="150" Height="40" HorizontalAlignment="Right" Margin="-300,-200,50,0"
+						   IsEditable="True" FontFamily="Impact" FontWeight="Normal"  Background="PowderBlue" SelectionChanged="ComboBoxTest"/>
+                    <ComboBox x:Name="ComboTest2" FontSize="20" Width="150" Height="40" HorizontalAlignment="Right" Margin="-300,-200,500,0"
+						   IsEditable="True" FontFamily="Impact" FontWeight="Normal"  Background="PowderBlue" SelectionChanged="ComboBoxTest2"/>
+
                 </StackPanel>
+
             </Grid>
         </TabItem>
 
