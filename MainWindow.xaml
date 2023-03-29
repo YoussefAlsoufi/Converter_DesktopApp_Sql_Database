@@ -87,7 +87,7 @@
 
                     <ComboBox x:Name="Cob_Units" FontSize="20" Width="200" Height="40" HorizontalAlignment="Left" Margin="5 0 0 0"
 						   IsEditable="True" FontFamily="Impact" FontWeight="Normal" HorizontalContentAlignment="Center" Background="PowderBlue" SelectionChanged="Cob_Units_SelectionChanged">
-                        
+
                     </ComboBox>
 
                     <ComboBox x:Name="Cob_From" HorizontalContentAlignment="Center" FontSize="20" Width="150" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70 0 0 0"

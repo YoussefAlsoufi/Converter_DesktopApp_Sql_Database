@@ -17,19 +17,14 @@ namespace Converter_DesktopApp_Sql_Database
     {
         private readonly List<UnitCategoriesParams> CategoriesList = new();
         private readonly List<UnitParameters> UnitsList = new();
-        
-
-        public NameValueCollection lengthSection, dataTypeSection, tempretureSection;
-        string currentCobValue = "";
-        string fromCobCurrentValue = "";
-        string toCobCurrentValue = "";
-        string currentValue = "";
+        private readonly MyConnection connection = new();
+        private string fromCobCurrentValue = "";
+        private string toCobCurrentValue = "";
         public MainWindow()
         {
             InitializeComponent();
             //Cob_Units.SelectedIndex = 0;
             Reader();
-
         }
 
         public void Reader()
@@ -70,6 +65,7 @@ namespace Converter_DesktopApp_Sql_Database
             connection.Close();
 
         }
+
         private string[] GetUnitByCategory(int cateId)
         {
             return UnitsList.Where(cate => cate.CateId == cateId).Select(UnitName => UnitName.UnitName).ToArray();
@@ -90,9 +86,29 @@ namespace Converter_DesktopApp_Sql_Database
             }
         }
 
-        private void Add_Button_Click(object sender, RoutedEventArgs e)
+        private void Add_Button_Click(object sender, RoutedEventArgs e) // the checking betweein Length input and Length in DataBase should be both Capital letters.
         {
 
+            int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
+            int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
+            if (Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && Input_Value.Text.Any())
+            {
+                if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(Cob_Unit_Label.Text.ToUpper()))
+                {
+
+                    connection.InsertCategory(newCateId, Cob_Unit_Label.Text.ToUpper());
+
+                    if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
+                    {
+                        int curruntCateId = Convert.ToInt32(CategoriesList.Where(cateName => cateName.CateName== Cob_Unit_Label.Text.ToUpper()).Select(cateId=>cateId.CateId).ToString());
+                        connection.InsertUnit(newUnitId, Cob_Unit_Label.Text.ToUpper(), curruntCateId, Input_Value.Text);
+                    }
+                }
+            }
+            else
+            {
+                confirmationMessage.Content = "Fill in Category , Unit Name and Value, please!";
+            }
         }
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
