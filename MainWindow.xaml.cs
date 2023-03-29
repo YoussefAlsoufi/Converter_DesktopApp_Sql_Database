@@ -15,8 +15,8 @@ namespace Converter_DesktopApp_Sql_Database
 {
     public partial class MainWindow : Window
     {
-        List<UnitCategoriesParams> CategoriesList = new();
-        List<UnitParameters> UnitsList = new();
+        private readonly List<UnitCategoriesParams> CategoriesList = new();
+        private readonly List<UnitParameters> UnitsList = new();
         
 
         public NameValueCollection lengthSection, dataTypeSection, tempretureSection;
@@ -27,88 +27,69 @@ namespace Converter_DesktopApp_Sql_Database
         public MainWindow()
         {
             InitializeComponent();
-            Cob_Units.SelectedIndex = 0;
+            //Cob_Units.SelectedIndex = 0;
             Reader();
 
         }
 
         public void Reader()
         {
-            SqlConnection connection = MyConnection.TestGetConnection();
+            //Category ComboBox:
+            SqlConnection connection = MyConnection.GetConnection();
             connection.Open();
-            SqlCommand Categories = new ("select * from dbo.tb_UnitCategories; ", connection);
+            SqlCommand Categories = new ("select * from dbo.CATEGORIES;", connection);
             SqlDataReader ComboCategories = Categories.ExecuteReader();
 
             while (ComboCategories.Read())
             {
-                ComboTest.Items.Add(ComboCategories["Cate_Name"]);
+                Cob_Units.Items.Add(ComboCategories["CATE_NAME"]);
                 CategoriesList.Add(new UnitCategoriesParams()
                 {
-                    CateId = ComboCategories["Cate_Id"] as string,
-                    CateName = ComboCategories["Cate_Name"] as string
+                    CateId = (int)ComboCategories["CATE_ID"],
+                    CateName = ComboCategories["CATE_NAME"] as string
                 });
             }
             connection.Close();
 
-
+            //from Unit ComboBox:
             connection.Open();
-            SqlCommand Units = new ("select * from dbo.tb_Units;", connection);
+            SqlCommand Units = new ("select * from dbo.UNITS;", connection);
             SqlDataReader ComboUnits = Units.ExecuteReader();
 
             while (ComboUnits.Read())
             {
                 UnitsList.Add(new UnitParameters()
                 {
-                    UnitId = (int)ComboUnits["Unit_Id"],
-                    UnitName = ComboUnits["Unit_Name"] as string ,
-                    CateId = ComboUnits["Cate_Id"] as string
+                    UnitId = (int)ComboUnits["UNIT_ID"],
+                    UnitName = ComboUnits["UNIT_NAME"] as string,
+                    CateId = (int)ComboUnits["CATE_ID"],
+                    Value = ComboUnits["VALUE"] as string
                 });
             }
 
             connection.Close();
 
-
-
-            /*
-            SqlConnection connection = MyConnection.GetConnection();
-            connection.Open();
-            SqlCommand command = new ("select * from [dbo].[Length]", connection);
-            command.CommandType = CommandType.Text;
-
-            SqlDataAdapter adapter = new (command);
-            _ = adapter.Fill(dt);
-
-            DataRow newRow = dt.NewRow();
-            newRow["LengthId"] = 0;
-            newRow["Unit_Name"] = "meter";
-            dt.Rows.InsertAt(newRow, 0);
-            connection.Close();
-            var test = dt.Rows;
-            var test1 = dt.Columns;
-            var tes = dt.PrimaryKey;
-            Console.WriteLine(dt.Rows.Count);
-            */
-
-
         }
-        private string[] GetUnitByCategory (string cateId)
+        private string[] GetUnitByCategory(int cateId)
         {
             return UnitsList.Where(cate => cate.CateId == cateId).Select(UnitName => UnitName.UnitName).ToArray();
         }
+        private string GetValue(string unitName)
+        {
+            return UnitsList.Where(value => value.UnitName == unitName).Select(value => value.Value).FirstOrDefault();
+        }
         private void Cob_Units_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
-            currentValue = (e.AddedItems[0] as ComboBoxItem).Content as string;
-            if (currentCobValue != currentValue)
+            Cob_From.Items.Clear();
+            Cob_To.Items.Clear();
+            int cateId = CategoriesList[Cob_Units.SelectedIndex].CateId;
+            foreach (string UnitName in GetUnitByCategory(cateId))
             {
-                currentCobValue = currentValue;
-                UpdateValues();
-
+                _ = Cob_From.Items.Add(UnitName);
+                _ = Cob_To.Items.Add(UnitName);
             }
-            
-            
-
         }
+
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
 
@@ -123,70 +104,42 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var inputValue = 0.0;
-            if (Input.Text.Any() && fromCobCurrentValue.Any() && toCobCurrentValue.Any() && currentValue.Any() && double.TryParse(Input.Text, out double n))
+            string cateName = CategoriesList[Cob_Units.SelectedIndex].CateName;
+            double inputValue;
+            if (Input.Text.Any() && fromCobCurrentValue.Any() && toCobCurrentValue.Any() && double.TryParse(Input.Text, out _))
             {
-                var fromValue = 0.0;
-                var toValue = 0.0;
                 inputValue = Convert.ToDouble(Input.Text);
-                if (currentValue == "Length" || currentValue == "Data")
+                if (inputValue >= 0)
                 {
-                    if (inputValue >= 0)
+                    if (cateName is "Length" or "DataType")
                     {
-                        if (currentValue == "Length")
-                        {
-                            if (fromCobCurrentValue != toCobCurrentValue)
-                            {
-                                fromValue = Convert.ToDouble(lengthSection[fromCobCurrentValue]);
-                                toValue = Convert.ToDouble(lengthSection[toCobCurrentValue]);
-                                results.Content = (inputValue * fromValue / toValue).ToString();
-                                fromCobCurrentValue = toCobCurrentValue = "";
-                            }
-                            else
-                            {
-                                results.Content = "You have chosen the same Units, Correct it please!";
-                            }
 
-                        }
-                        else if (currentValue == "Data")
+                        if (fromCobCurrentValue != toCobCurrentValue)
                         {
-                            if (fromCobCurrentValue != toCobCurrentValue)
-                            {
-                                fromValue = Convert.ToDouble(dataTypeSection[fromCobCurrentValue]);
-                                toValue = Convert.ToDouble(dataTypeSection[toCobCurrentValue]);
-                                results.Content = (inputValue * fromValue / toValue).ToString();
-                                fromCobCurrentValue = toCobCurrentValue = "";
-                            }
-                            else
-                            {
-                                results.Content = "You have chosen the same Units, Correct it please!";
-                            }
+                            double fromValue = Convert.ToDouble(GetValue(fromCobCurrentValue));
+                            double toValue = Convert.ToDouble(GetValue(toCobCurrentValue));
+                            results.Content = (inputValue * fromValue / toValue).ToString();
+                        }
+                        else
+                        {
+                            results.Content = "You have chosen the same Units, Correct it please!";
                         }
 
                     }
-                    else
+                    else if (cateName == "Temperature")
                     {
-                        results.Content = "Enter a positive number, please!";
+                        results.Content = fromCobCurrentValue == "CELSIU" && toCobCurrentValue == "FAHRENHEIT"
+                            ? ((inputValue * 1.8) + 32).ToString()
+                            : fromCobCurrentValue == "FAHRENHEIT" && toCobCurrentValue == "CELSIU"
+                                ? ((inputValue - 32) / 1.8).ToString()
+                                : "You have chosen the same Units, Correct it please!";
                     }
+
                 }
-
-
-                else if (currentValue == "Tempreture")
+                else
                 {
-                    if (fromCobCurrentValue == "celsiu" && toCobCurrentValue == "fahrenheit")
-                    {
-                        results.Content = ((inputValue * 1.8) + 32).ToString();
-                        fromCobCurrentValue = toCobCurrentValue = "";
-                    }
-                    else if (fromCobCurrentValue == "fahrenheit" && toCobCurrentValue == "celsiu")
-                    {
-                        results.Content = ((inputValue - 32) / 1.8).ToString();
-                        fromCobCurrentValue = toCobCurrentValue = "";
-                    }
-                    else
-                    {
-                        results.Content = "You have chosen the same Units, Correct it please!";
-                    }
+                    results.Content = "Enter a positive number, please!";
+                    
                 }
             }
             else
@@ -194,11 +147,7 @@ namespace Converter_DesktopApp_Sql_Database
                 results.Content = "Choose your Units and add a correct Number, please!";
             }
 
-
-
-
         }
-
         private void Cob_To_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (Cob_To.SelectedItem != null)
@@ -215,64 +164,8 @@ namespace Converter_DesktopApp_Sql_Database
             }
 
         }
-        private void ComboBoxTest(object sender, SelectionChangedEventArgs e)
-        {
-            ComboTest2.Items.Clear();
-            string cateId = CategoriesList[ComboTest.SelectedIndex].CateId;
-            foreach (string UnitName in GetUnitByCategory(cateId))
-            {
-                ComboTest2.Items.Add(UnitName);
-            }
-
-        }
-        private void ComboBoxTest2(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-        public void UpdateValues()
-        {
-            switch (currentCobValue)
-            {
-                case "Length":
-                    {
-                        Cob_From.Items.Clear();
-                        Cob_To.Items.Clear();
-                        lengthSection = (NameValueCollection)ConfigurationManager.GetSection("Length");
-                        foreach (string s in lengthSection.AllKeys)
-                        {
-                            Cob_From.Items.Add(s);
-                            Cob_To.Items.Add(s);
-                        }
-                        break;
-                    }
-                case "Data":
-                    {
-                        Cob_From.Items.Clear();
-                        Cob_To.Items.Clear();
-                        dataTypeSection = (NameValueCollection)ConfigurationManager.GetSection("Data");
-                        foreach (string s in dataTypeSection.AllKeys)
-                        {
-                            Cob_From.Items.Add(s);
-                            Cob_To.Items.Add(s);
-                        }
-                        break;
-                    }
-                case "Tempreture":
-                    {
-                        Cob_From.Items.Clear();
-                        Cob_To.Items.Clear();
-                        tempretureSection = (NameValueCollection)ConfigurationManager.GetSection("Tempreture");
-                        foreach (string s in tempretureSection.AllKeys)
-                        {
-                            Cob_From.Items.Add(s);
-                            Cob_To.Items.Add(s);
-                        }
-                        break;
-                    }
-
-            }
-        }
-
 
     }
+
+
 }

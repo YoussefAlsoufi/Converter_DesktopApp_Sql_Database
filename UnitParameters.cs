@@ -11,7 +11,8 @@ namespace Converter_DesktopApp_Sql_Database
     {
         public int UnitId { get; set; }
         public string UnitName { get; set; }
-        public string CateId { get; set; }
+        public int CateId { get; set; }
+        public string Value { get; set; }
 
     }
 }

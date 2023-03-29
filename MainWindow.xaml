@@ -87,10 +87,7 @@
 
                     <ComboBox x:Name="Cob_Units" FontSize="20" Width="200" Height="40" HorizontalAlignment="Left" Margin="5 0 0 0"
 						   IsEditable="True" FontFamily="Impact" FontWeight="Normal" HorizontalContentAlignment="Center" Background="PowderBlue" SelectionChanged="Cob_Units_SelectionChanged">
-                        <ComboBoxItem Content="--Select a Uniy Type--"></ComboBoxItem>
-                        <ComboBoxItem Content="Length"></ComboBoxItem>
-                        <ComboBoxItem Content="Data"></ComboBoxItem>
-                        <ComboBoxItem Content="Tempreture"></ComboBoxItem>
+                        
                     </ComboBox>
 
                     <ComboBox x:Name="Cob_From" HorizontalContentAlignment="Center" FontSize="20" Width="150" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70 0 0 0"
@@ -143,10 +140,6 @@
                 
                 <StackPanel Grid.Row="4" Grid.RowSpan="3" Grid.Column="2">
                     <Image   Grid.Row="4" Width="372" Height="130" Source="/Images/converter.png" HorizontalAlignment="Center"/>
-                    <ComboBox x:Name="ComboTest" FontSize="20" Width="150" Height="40" HorizontalAlignment="Right" Margin="-300,-200,50,0"
-						   IsEditable="True" FontFamily="Impact" FontWeight="Normal"  Background="PowderBlue" SelectionChanged="ComboBoxTest"/>
-                    <ComboBox x:Name="ComboTest2" FontSize="20" Width="150" Height="40" HorizontalAlignment="Right" Margin="-300,-200,500,0"
-						   IsEditable="True" FontFamily="Impact" FontWeight="Normal"  Background="PowderBlue" SelectionChanged="ComboBoxTest2"/>
 
                 </StackPanel>
 

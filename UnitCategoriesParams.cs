@@ -9,7 +9,7 @@ namespace Converter_DesktopApp_Sql_Database
     [Serializable]
     public class UnitCategoriesParams
     {
-        public string CateId { get; set; }
+        public int CateId { get; set; }
         public string CateName { get; set; }
 
 
