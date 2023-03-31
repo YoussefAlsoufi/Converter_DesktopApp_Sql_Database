@@ -155,9 +155,16 @@ namespace Converter_DesktopApp_Sql_Database
                 inputValue = Convert.ToDouble(Input.Text);
                 if (inputValue >= 0)
                 {
-                    if (cateName is "Length" or "DataType")
+                    if (cateName == "TEMPERATURE")
                     {
-
+                        results.Content = fromCobCurrentValue == "CELSIU" && toCobCurrentValue == "FAHRENHEIT"
+                            ? ((inputValue * 1.8) + 32).ToString()
+                            : fromCobCurrentValue == "FAHRENHEIT" && toCobCurrentValue == "CELSIU"
+                                ? ((inputValue - 32) / 1.8).ToString()
+                                : "You have chosen the same Units, Correct it please!";
+                    }
+                    else
+                    {
                         if (fromCobCurrentValue != toCobCurrentValue)
                         {
                             double fromValue = Convert.ToDouble(GetValue(fromCobCurrentValue));
@@ -169,14 +176,6 @@ namespace Converter_DesktopApp_Sql_Database
                             results.Content = "You have chosen the same Units, Correct it please!";
                         }
 
-                    }
-                    else if (cateName == "Temperature")
-                    {
-                        results.Content = fromCobCurrentValue == "CELSIU" && toCobCurrentValue == "FAHRENHEIT"
-                            ? ((inputValue * 1.8) + 32).ToString()
-                            : fromCobCurrentValue == "FAHRENHEIT" && toCobCurrentValue == "CELSIU"
-                                ? ((inputValue - 32) / 1.8).ToString()
-                                : "You have chosen the same Units, Correct it please!";
                     }
 
                 }
