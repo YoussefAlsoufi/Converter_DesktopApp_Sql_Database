@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Configuration;
 using System.Linq;
-using System.Data.Entity.Design.PluralizationServices;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
@@ -35,7 +31,6 @@ namespace Converter_DesktopApp_Sql_Database
             connection.Open();
             SqlCommand Categories = new ("select * from dbo.CATEGORIES;", connection);
             SqlDataReader ComboCategories = Categories.ExecuteReader();
-
             while (ComboCategories.Read())
             {
                 Cob_Units.Items.Add(ComboCategories["CATE_NAME"]);
@@ -51,7 +46,6 @@ namespace Converter_DesktopApp_Sql_Database
             connection.Open();
             SqlCommand Units = new ("select * from dbo.UNITS;", connection);
             SqlDataReader ComboUnits = Units.ExecuteReader();
-
             while (ComboUnits.Read())
             {
                 UnitsList.Add(new UnitParameters()
@@ -62,18 +56,14 @@ namespace Converter_DesktopApp_Sql_Database
                     Value = ComboUnits["VALUE"] as string
                 });
             }
-
             connection.Close();
-
         }
-
         private string GetCategoryName(string unitNameInput)
         {
             return CategoriesList[UnitsList.Where(unitName => unitName.UnitName == unitNameInput).Select(cateId => cateId.CateId).FirstOrDefault() - 1].CateName;
         }
         private string[] GetUnitByCategory(int cateId)
         {
-            var te= UnitsList.Where(cate => cate.CateId == cateId).Select(UnitName => UnitName.UnitName).ToArray();
             return UnitsList.Where(cate => cate.CateId == cateId).Select(UnitName => UnitName.UnitName).ToArray();
         }
         private string GetValue(string unitName)
@@ -90,7 +80,6 @@ namespace Converter_DesktopApp_Sql_Database
                 _ = Cob_From.Items.Add(UnitName);
                 _ = Cob_To.Items.Add(UnitName);
             }
-            
         }
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -183,15 +172,13 @@ namespace Converter_DesktopApp_Sql_Database
                 }
                 else
                 {
-                    results.Content = "Enter a positive number, please!";
-                    
+                    results.Content = "Enter a positive number, please!";     
                 }
             }
             else
             {
                 results.Content = "Choose your Units and add a correct Number, please!";
             }
-
         }
         private void Cob_To_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -199,7 +186,6 @@ namespace Converter_DesktopApp_Sql_Database
             {
                 toCobCurrentValue = Cob_To.SelectedItem.ToString();
             }
-
         }
         private void Cob_From_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -207,10 +193,6 @@ namespace Converter_DesktopApp_Sql_Database
             {
                 fromCobCurrentValue = Cob_From.SelectedItem.ToString();
             }
-
         }
-
     }
-
-
 }
