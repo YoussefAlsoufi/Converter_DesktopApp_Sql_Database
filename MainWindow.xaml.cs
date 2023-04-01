@@ -30,7 +30,7 @@ namespace Converter_DesktopApp_Sql_Database
         public void Reader()
         {
             //Category ComboBox:
-            //CategoriesList.Clear();
+            CategoriesList.Clear();
             SqlConnection connection = MyConnection.GetConnection();
             connection.Open();
             SqlCommand Categories = new ("select * from dbo.CATEGORIES;", connection);
@@ -84,8 +84,7 @@ namespace Converter_DesktopApp_Sql_Database
         {
             Cob_From.Items.Clear();
             Cob_To.Items.Clear();
-            
-            int cateId = CategoriesList[Cob_Units.SelectedIndex].CateId;
+            int cateId= Cob_Units.SelectedIndex == -1 ? 1 : CategoriesList[Cob_Units.SelectedIndex].CateId; 
             foreach (string UnitName in GetUnitByCategory(cateId))
             {
                 _ = Cob_From.Items.Add(UnitName);
@@ -93,7 +92,6 @@ namespace Converter_DesktopApp_Sql_Database
             }
             
         }
-
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
             int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
@@ -106,7 +104,7 @@ namespace Converter_DesktopApp_Sql_Database
                     {
                         connection.InsertCategory(newCateId, Cob_Unit_Label.Text.ToUpper());
                         connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), newCateId + 1, Input_Value.Text);
-                        
+                        Cob_Units.Items.Clear();
                         Reader();
                         confirmationMessage.Content = "Adding to DataBase is Done!";
                         _ = MessageBox.Show($"New Categort '{Cob_Unit_Label.Text.ToUpper()}' and New Unit '{Cob_To_Label.Text.ToUpper()}' have been added to the Database successfully", "Converter");
@@ -141,7 +139,8 @@ namespace Converter_DesktopApp_Sql_Database
 
             Cob_Unit_Label.Text = Cob_To_Label.Text= Input_Value.Text = "";
             confirmationMessage.Content = "";
-
+            Input.Text = "";
+            results.Content = "";
         }
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -180,9 +179,7 @@ namespace Converter_DesktopApp_Sql_Database
                         {
                             results.Content = "You have chosen the same Units, Correct it please!";
                         }
-
                     }
-
                 }
                 else
                 {
