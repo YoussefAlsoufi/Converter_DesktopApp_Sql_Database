@@ -43,6 +43,7 @@ namespace Converter_DesktopApp_Sql_Database
             connection.Close();
 
             //from Unit ComboBox:
+            UnitsList.Clear();
             connection.Open();
             SqlCommand Units = new ("select * from dbo.UNITS;", connection);
             SqlDataReader ComboUnits = Units.ExecuteReader();
@@ -97,6 +98,8 @@ namespace Converter_DesktopApp_Sql_Database
                         Reader();
                         confirmationMessage.Content = "Adding to DataBase is Done!";
                         _ = MessageBox.Show($"New Categort '{Cob_Unit_Label.Text.ToUpper()}' and New Unit '{Cob_To_Label.Text.ToUpper()}' have been added to the Database successfully", "Converter");
+                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                        confirmationMessage.Content = "";
                     }
                     else
                     {
@@ -110,8 +113,12 @@ namespace Converter_DesktopApp_Sql_Database
                     {
                         int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
                         connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), curruntCateId, Input_Value.Text);
-                        confirmationMessage.Content = "Adding to DataBase is Done!"; 
+                        Cob_Units.Items.Clear();
+                        Reader();
+                        confirmationMessage.Content = "Adding to DataBase is Done!";
                         _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit under '{Cob_Unit_Label.Text.ToUpper()}' Category has been added successfully", "Converter");
+                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                        confirmationMessage.Content = "";
                     }
                     else
                     {
@@ -126,8 +133,6 @@ namespace Converter_DesktopApp_Sql_Database
                 _ = MessageBox.Show("Fill All fields 'Category' , 'Unit Name' and 'Value', please!", "Converter");
             }
 
-            Cob_Unit_Label.Text = Cob_To_Label.Text= Input_Value.Text = "";
-            confirmationMessage.Content = "";
             Input.Text = "";
             results.Content = "";
         }
