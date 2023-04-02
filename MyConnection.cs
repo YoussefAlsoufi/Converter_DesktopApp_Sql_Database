@@ -1,5 +1,4 @@
 ﻿using System.Data.SqlClient;
-using System.Configuration;
 
 namespace Converter_DesktopApp_Sql_Database
 {
@@ -27,5 +26,34 @@ namespace Converter_DesktopApp_Sql_Database
             connection.Close();
 
         }
+        public void DeleteCategory(string cateName, int cateId)
+        {
+            //delete the Cate:
+            connection.Open();
+            SqlCommand deleteCate = new($"delete from dbo.CATEGORIES where CATE_NAME = '{cateName}';", connection);
+            _ = deleteCate.ExecuteNonQuery();
+            connection.Close();
+            //delete all related Units:
+            connection.Open();
+            SqlCommand deleteUnit = new($"delete from dbo.UNITS where CATE_ID = {cateId};", connection);
+            _ = deleteUnit.ExecuteNonQuery();
+            connection.Close();
+
+        }
+        public void DeleteUnit(string unitName)
+        {
+            connection.Open();
+            SqlCommand deleteUnit = new($"delete from dbo.UNITS where UNIT_NAME = '{unitName}';", connection);
+            _ = deleteUnit.ExecuteNonQuery();
+            connection.Close();
+        }
+        public void EditValue(string unitName, int cateId)
+        {
+            connection.Open();
+            SqlCommand editValue = new($"UPDATE dbo.UNITS SET VALUE = 1000 WHERE UNIT_NAME = '{unitName}' AND CATE_ID = {cateId}; ", connection);
+            _ = editValue.ExecuteNonQuery();
+            connection.Close();
+        }
+            
     }
 }
