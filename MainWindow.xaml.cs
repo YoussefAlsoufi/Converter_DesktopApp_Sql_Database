@@ -138,6 +138,7 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
+            int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
             if (Cob_Unit_Label.Text.Any())
             {
                 if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(Cob_Unit_Label.Text.ToUpper()))
@@ -153,7 +154,7 @@ namespace Converter_DesktopApp_Sql_Database
                     DialogResult result = (DialogResult)MessageBox.Show("Do you want to delete all the Category ?", "Converter", buttons);
                     if (result == DevExpress.Utils.CommonDialogs.Internal.DialogResult.Yes)
                     {
-                        int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
+
                         connection.DeleteCategory(Cob_Unit_Label.Text.ToUpper(), curruntCateId);
                         Cob_Units.Items.Clear();
                         Reader();
@@ -175,26 +176,33 @@ namespace Converter_DesktopApp_Sql_Database
                             }
                             else
                             {
-                                connection.DeleteUnit(Cob_To_Label.Text.ToUpper());
-                                Cob_Units.Items.Clear();
-                                Reader();
-                                confirmationMessage.Content = "Delete from DataBase is Done!";
-                                _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit has been deleted from '{Cob_Unit_Label.Text.ToUpper()}' Categoty Successfully", "Converter");
-                                Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
-                                confirmationMessage.Content = "";
+                                if (UnitsList.Where(unitName=>unitName.UnitName==Cob_To_Label.Text.ToUpper()).Select(cateId=>cateId.CateId).FirstOrDefault() == curruntCateId)
+                                {
+                                    connection.DeleteUnit(Cob_To_Label.Text.ToUpper());
+                                    Cob_Units.Items.Clear();
+                                    Reader();
+                                    confirmationMessage.Content = "Delete from DataBase is Done!";
+                                    _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit has been deleted from '{Cob_Unit_Label.Text.ToUpper()}' Categoty Successfully", "Converter");
+                                    Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                                    confirmationMessage.Content = "";
+
+                                }
+                                else
+                                {
+                                    confirmationMessage.Content = "Check Your Inputs, Please!";
+                                    _ = MessageBox.Show($"{Cob_To_Label.Text.ToUpper()} is Not under {Cob_Unit_Label.Text.ToUpper()} Category, Check your inputs, please!", "Converter");
+                                    confirmationMessage.Content = "";
+                                }
 
                             }
-
                         }
                         else
                         {
                             confirmationMessage.Content = "Check again, Please!";
-                            _ = MessageBox.Show($"{Cob_To_Label.Text.ToUpper()} is Not under {Cob_Unit_Label.Text.ToUpper()} Category, Check your inputs, please!", "Converter");
+                            _ = MessageBox.Show($"Fill Unit field and try again, Please!", "Converter");
                             confirmationMessage.Content = "";
 
                         }
-                           
-
                     }
                 }
             }
@@ -208,37 +216,45 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Edit_Button_Click(object sender, RoutedEventArgs e)
         {
+            int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
             if (Input_Value.Text.Any() && Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && double.TryParse(Input_Value.Text, out _))
             {
                 if (CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(Cob_Unit_Label.Text.ToUpper()))
                 {
                     if (UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
                     {
-                        int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
-                        connection.EditValue(Cob_To_Label.Text.ToUpper(), curruntCateId);
-                        Cob_Units.Items.Clear();
-                        Reader();
-                        confirmationMessage.Content = "Update DataBase is Done!";
-                        _ = MessageBox.Show($" The Value of '{Cob_To_Label.Text.ToUpper()}' Unit under '{Cob_Unit_Label.Text.ToUpper()}' Categoty has been updated Successfully", "Converter");
-                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
-                        confirmationMessage.Content = "";
+                        if (UnitsList.Where(unitName => unitName.UnitName == Cob_To_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault() == curruntCateId)
+                        {
+                            connection.EditValue(Cob_To_Label.Text.ToUpper(), curruntCateId);
+                            Cob_Units.Items.Clear();
+                            Reader();
+                            confirmationMessage.Content = "Update DataBase is Done!";
+                            _ = MessageBox.Show($" The Value of '{Cob_To_Label.Text.ToUpper()}' Unit under '{Cob_Unit_Label.Text.ToUpper()}' Categoty has been updated Successfully", "Converter");
+                            Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                            confirmationMessage.Content = "";
+                        }
+                        else
+                        {
+                            confirmationMessage.Content = "Check Your Inputs, Please!";
+                            _ = MessageBox.Show($"{Cob_To_Label.Text.ToUpper()} is Not under {Cob_Unit_Label.Text.ToUpper()} Category, Check your inputs, please!", "Converter");
+                            confirmationMessage.Content = "";
+
+                        }
+
                     }
                     else
                     {
                         confirmationMessage.Content = "The Unit is Not under the Category!";
-                        _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' is NOT Under '{Cob_Unit_Label.Text.ToUpper()}', please check your inputs!", "Converter");
+                       _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' is NOT exist in the Unit list, please check your inputs!", "Converter");
                         confirmationMessage.Content = "";
                     }
-
-
                 }
                 else
                 {
                     confirmationMessage.Content = "Category is Not exist in DataBase!";
-                    _ = MessageBox.Show($"'{Cob_Unit_Label.Text.ToUpper()}' is NOT exist, please check your inputs!", "Converter");
+                    _ = MessageBox.Show($"'{Cob_Unit_Label.Text.ToUpper()}' is NOT exist in Category List, please check your inputs!", "Converter");
                     confirmationMessage.Content = "";
                 }
-
             }
             else
             {
