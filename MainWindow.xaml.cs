@@ -19,7 +19,6 @@ namespace Converter_DesktopApp_Sql_Database
         public MainWindow()
         {
             InitializeComponent();
-            //Cob_Units.SelectedIndex = 0;
             Reader();
         }
 
@@ -41,7 +40,8 @@ namespace Converter_DesktopApp_Sql_Database
                 });
             }
             connection.Close();
-
+            // Start the App with --Select a Unit Category -- :
+            Cob_Units.SelectedIndex = CategoriesList.Select(i => i.CateId).FirstOrDefault()-1;
             //from Unit ComboBox:
             UnitsList.Clear();
             connection.Open();
