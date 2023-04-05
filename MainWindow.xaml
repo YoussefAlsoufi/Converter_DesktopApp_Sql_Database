@@ -304,6 +304,24 @@
                         </Button.Background>
                     </Button>
 
+                    <StackPanel>
+
+                        <Button  Width="120" Height="70" Content="Undo" Click="Undo_Button_Click" Margin="-750,-90,0,0" FontSize="28" FontFamily="Impact" FontWeight="Normal" Foreground="#FFE1F3F3"
+                                 BorderThickness="5">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="25"></Setter>
+                                </Style>
+                            </Button.Resources>
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="YellowGreen" Offset="0"/>
+                                    <GradientStop Color="#FF818BEA" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                    </StackPanel>
+
                 </StackPanel>
 
 

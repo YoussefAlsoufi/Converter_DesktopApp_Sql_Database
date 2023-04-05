@@ -11,8 +11,10 @@ namespace Converter_DesktopApp_Sql_Database
 {
     public partial class MainWindow : Window
     {
-        private readonly List<UnitCategoriesParams> CategoriesList = new();
-        private readonly List<UnitParameters> UnitsList = new();
+        private List<UnitCategoriesParams> CategoriesList = new();
+        private List<UnitCategoriesParams> UndoCategoriesList = new();
+        private List<UnitParameters> UnitsList = new();
+        private List<UnitParameters> UndoUnitsList = new();
         private readonly MyConnection connection = new();
         private string fromCobCurrentValue = "";
         private string toCobCurrentValue = "";
@@ -33,7 +35,7 @@ namespace Converter_DesktopApp_Sql_Database
             while (ComboCategories.Read())
             {
                 Cob_Units.Items.Add(ComboCategories["CATE_NAME"]);
-                CategoriesList.Add(new UnitCategoriesParams()
+                CategoriesList.Add(new UnitCategoriesParams() 
                 {
                     CateId = (int)ComboCategories["CATE_ID"],
                     CateName = ComboCategories["CATE_NAME"] as string
@@ -41,7 +43,7 @@ namespace Converter_DesktopApp_Sql_Database
             }
             connection.Close();
             // Start the App with --Select a Unit Category -- :
-            Cob_Units.SelectedIndex = CategoriesList.Select(i => i.CateId).FirstOrDefault()-1;
+            Cob_Units.SelectedIndex = CategoriesList.Select(i => i.CateId).FirstOrDefault() - 1;
             //from Unit ComboBox:
             UnitsList.Clear();
             connection.Open();
@@ -154,7 +156,6 @@ namespace Converter_DesktopApp_Sql_Database
                     DialogResult result = (DialogResult)MessageBox.Show("Do you want to delete all the Category ?", "Converter", buttons);
                     if (result == DevExpress.Utils.CommonDialogs.Internal.DialogResult.Yes)
                     {
-
                         connection.DeleteCategory(Cob_Unit_Label.Text.ToUpper(), curruntCateId);
                         Cob_Units.Items.Clear();
                         Reader();
@@ -317,6 +318,11 @@ namespace Converter_DesktopApp_Sql_Database
             {
                 fromCobCurrentValue = Cob_From.SelectedItem.ToString();
             }
+        }
+
+        private void Undo_Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

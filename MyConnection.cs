@@ -1,7 +1,9 @@
-﻿using System.Data.SqlClient;
+﻿using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace Converter_DesktopApp_Sql_Database
 {
+
     public class MyConnection
     {
         private readonly SqlConnection connection = GetConnection();
