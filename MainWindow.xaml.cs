@@ -12,12 +12,13 @@ namespace Converter_DesktopApp_Sql_Database
     public partial class MainWindow : Window
     {
         private List<UnitCategoriesParams> CategoriesList = new();
-        private List<UnitCategoriesParams> UndoCategoriesList = new();
+        private List<string> UndoCategoriesList = new();
         private List<UnitParameters> UnitsList = new();
         private List<UnitParameters> UndoUnitsList = new();
         private readonly MyConnection connection = new();
         private string fromCobCurrentValue = "";
         private string toCobCurrentValue = "";
+        private string ActionName = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -86,6 +87,10 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
+            AddAction();
+        }
+        private void AddAction()
+        {
             int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
             int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
             if (Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && Input_Value.Text.Any())
@@ -137,6 +142,7 @@ namespace Converter_DesktopApp_Sql_Database
 
             Input.Text = "";
             results.Content = "";
+
         }
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -156,6 +162,7 @@ namespace Converter_DesktopApp_Sql_Database
                     DialogResult result = (DialogResult)MessageBox.Show("Do you want to delete all the Category ?", "Converter", buttons);
                     if (result == DevExpress.Utils.CommonDialogs.Internal.DialogResult.Yes)
                     {
+                        BackupAction(Cob_Unit_Label.Text.ToUpper(), curruntCateId);
                         connection.DeleteCategory(Cob_Unit_Label.Text.ToUpper(), curruntCateId);
                         Cob_Units.Items.Clear();
                         Reader();
@@ -163,7 +170,7 @@ namespace Converter_DesktopApp_Sql_Database
                         _ = MessageBox.Show($" '{Cob_Unit_Label.Text.ToUpper()}' Categry with all related Units have been deleted Successfully", "Converter");
                         Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
                         confirmationMessage.Content = "";
-
+                        ActionName = "deleteAllCategory";
                     }
                     else
                     {
@@ -214,6 +221,12 @@ namespace Converter_DesktopApp_Sql_Database
                 confirmationMessage.Content = "";
             }
 
+        }
+        private (string, (string UnitName, int CateId, string Value)[]) BackupAction(string CateName, int currantCateId)
+        {
+            string currantCateName = CateName;
+            (string UnitName, int CateId, string Value)[] unitsDetails = UnitsList.Where(cateId => cateId.CateId == currantCateId).Select(i => (i.UnitName, i.CateId, i.Value)).ToArray();
+            return (currantCateName, unitsDetails);
         }
         private void Edit_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -322,6 +335,11 @@ namespace Converter_DesktopApp_Sql_Database
 
         private void Undo_Button_Click(object sender, RoutedEventArgs e)
         {
+            if (ActionName == "deleteAllCategory")
+            {
+
+
+            }
 
         }
     }
