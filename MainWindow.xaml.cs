@@ -64,7 +64,7 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private string GetCategoryName(string unitNameInput)
         {
-            return CategoriesList[UnitsList.Where(unitName => unitName.UnitName == unitNameInput).Select(cateId => cateId.CateId).FirstOrDefault() - 1].CateName;
+            return CategoriesList[UnitsList.Where(unitName => unitName.UnitName == unitNameInput).Select(cateId => cateId.CateId).FirstOrDefault()].CateName;
         }
         private string[] GetUnitByCategory(int cateId)
         {
@@ -87,62 +87,62 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
-            AddAction();
-        }
-        private void AddAction()
-        {
-            int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
-            int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
             if (Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && Input_Value.Text.Any())
             {
-                if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(Cob_Unit_Label.Text.ToUpper()))
-                {
-                    if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
-                    {
-                        connection.InsertCategory(newCateId, Cob_Unit_Label.Text.ToUpper());
-                        connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), newCateId + 1, Input_Value.Text);
-                        Cob_Units.Items.Clear();
-                        Reader();
-                        confirmationMessage.Content = "Adding to DataBase is Done!";
-                        _ = MessageBox.Show($"New Categort '{Cob_Unit_Label.Text.ToUpper()}' and New Unit '{Cob_To_Label.Text.ToUpper()}' have been added to the Database successfully", "Converter");
-                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
-                        confirmationMessage.Content = "";
-                    }
-                    else
-                    {
-                        confirmationMessage.Content = " Please, Check again!";
-                        _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' Unit is existed under '{GetCategoryName(Cob_To_Label.Text.ToUpper())}' Category", "Converter");
-                    }
-                }
-                else
-                {
-                    if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
-                    {
-                        int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == Cob_Unit_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault();
-                        connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), curruntCateId, Input_Value.Text);
-                        Cob_Units.Items.Clear();
-                        Reader();
-                        confirmationMessage.Content = "Adding to DataBase is Done!";
-                        _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit under '{Cob_Unit_Label.Text.ToUpper()}' Category has been added successfully", "Converter");
-                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
-                        confirmationMessage.Content = "";
-                    }
-                    else
-                    {
-                        confirmationMessage.Content = " Please, Check again!";
-                        _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' Unit and '{Cob_Unit_Label.Text.ToUpper()}' Category are already existed", "Converter");
-                    }
-                }
+                AddAction(Cob_Unit_Label.Text.ToUpper());
             }
             else
             {
                 confirmationMessage.Content = "Fill in all fields, please!";
                 _ = MessageBox.Show("Fill All fields 'Category' , 'Unit Name' and 'Value', please!", "Converter");
             }
+        }
+        private void AddAction(string CurrantCateName)
+        {
+            int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
+            int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
+
+            if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(CurrantCateName))
+            {
+                if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
+                {
+                    connection.InsertCategory(newCateId, CurrantCateName);
+                    connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), newCateId + 1, Input_Value.Text);
+                    Cob_Units.Items.Clear();
+                    Reader();
+                    confirmationMessage.Content = "Adding to DataBase is Done!";
+                    _ = MessageBox.Show($"New Categort '{CurrantCateName}' and New Unit '{Cob_To_Label.Text.ToUpper()}' have been added to the Database successfully", "Converter");
+                    Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                    confirmationMessage.Content = "";
+                }
+                else
+                {
+                    confirmationMessage.Content = " Please, Check again!";
+                    _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' Unit is existed under '{GetCategoryName(Cob_To_Label.Text.ToUpper())}' Category", "Converter");
+                }
+            }
+            else
+            {
+                if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
+                {
+                    int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
+                    connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), curruntCateId, Input_Value.Text);
+                    Cob_Units.Items.Clear();
+                    Reader();
+                    confirmationMessage.Content = "Adding to DataBase is Done!";
+                    _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit under '{CurrantCateName}' Category has been added successfully", "Converter");
+                    Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                    confirmationMessage.Content = "";
+                }
+                else
+                {
+                    confirmationMessage.Content = " Please, Check again!";
+                    _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' Unit and '{CurrantCateName}' Category are already existed", "Converter");
+                }
+            }
 
             Input.Text = "";
             results.Content = "";
-
         }
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
