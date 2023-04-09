@@ -12,13 +12,14 @@ namespace Converter_DesktopApp_Sql_Database
     public partial class MainWindow : Window
     {
         private readonly List<UnitCategoriesParams> CategoriesList = new();
-        private (string UnitName, int CateId, string Value)[] RelatedUnitsList;
+        private List<string[]> RelatedUnitsList= new();
         private readonly List<UnitParameters> UnitsList = new();
         private readonly MyConnection connection = new();
         private string fromCobCurrentValue = "";
         private string toCobCurrentValue = "";
         private string ActionName = "";
         private string LastCateName = "";
+        private string CurrantUnitName = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -87,7 +88,7 @@ namespace Converter_DesktopApp_Sql_Database
         }
         private void Add_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && Input_Value.Text.Any())
+            if (Cob_Unit_Label.Text.Any() && Cob_To_Label.Text.Any() && Input_Value.Text.Any() && double.TryParse(Input_Value.Text, out _))
             {
                 AddAction(Cob_Unit_Label.Text.ToUpper());
             }
@@ -101,12 +102,14 @@ namespace Converter_DesktopApp_Sql_Database
         {
             int newCateId = CategoriesList.Select(cateId => cateId.CateId).ToArray().Max();
             int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
+            int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
 
             if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(CurrantCateName))
             {
                 if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
                 {
                     connection.InsertCategory(newCateId, CurrantCateName);
+                    (LastCateName, RelatedUnitsList, CurrantUnitName) = BackupAction(CurrantCateName, curruntCateId);
                     connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), newCateId + 1, Input_Value.Text);
                     Cob_Units.Items.Clear();
                     Reader();
@@ -114,6 +117,7 @@ namespace Converter_DesktopApp_Sql_Database
                     _ = MessageBox.Show($"New Categort '{CurrantCateName}' and New Unit '{Cob_To_Label.Text.ToUpper()}' have been added to the Database successfully", "Converter");
                     Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
                     confirmationMessage.Content = "";
+                    ActionName = "AddCategory";
                 }
                 else
                 {
@@ -125,14 +129,16 @@ namespace Converter_DesktopApp_Sql_Database
             {
                 if (!UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
                 {
-                    int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
+                    
                     connection.InsertUnit(newUnitId, Cob_To_Label.Text.ToUpper(), curruntCateId, Input_Value.Text);
                     Cob_Units.Items.Clear();
                     Reader();
+                    (LastCateName, RelatedUnitsList, CurrantUnitName) = BackupAction(CurrantCateName, curruntCateId);
                     confirmationMessage.Content = "Adding to DataBase is Done!";
                     _ = MessageBox.Show($" '{Cob_To_Label.Text.ToUpper()}' Unit under '{CurrantCateName}' Category has been added successfully", "Converter");
                     Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
                     confirmationMessage.Content = "";
+                    ActionName = "AddonlyUnit";
                 }
                 else
                 {
@@ -161,7 +167,6 @@ namespace Converter_DesktopApp_Sql_Database
         private void RemoveAction(string CurrantCateName)
         {
             int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
-
             if (!CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(CurrantCateName))
             {
                 confirmationMessage.Content = "Category is NOT in DataBase, Please check!";
@@ -175,7 +180,7 @@ namespace Converter_DesktopApp_Sql_Database
                 DialogResult result = (DialogResult)MessageBox.Show("Do you want to delete all the Category ?", "Converter", buttons);
                 if (result == DevExpress.Utils.CommonDialogs.Internal.DialogResult.Yes)
                 {
-                    (LastCateName, RelatedUnitsList) = BackupAction(CurrantCateName, curruntCateId);
+                    (LastCateName, RelatedUnitsList, CurrantUnitName) = BackupAction(CurrantCateName, curruntCateId);
                     connection.DeleteCategory(CurrantCateName, curruntCateId);
                     Cob_Units.Items.Clear();
                     Reader();
@@ -199,6 +204,7 @@ namespace Converter_DesktopApp_Sql_Database
                         {
                             if (UnitsList.Where(unitName => unitName.UnitName == Cob_To_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault() == curruntCateId)
                             {
+                                (LastCateName, RelatedUnitsList, CurrantUnitName) = BackupAction(CurrantCateName, curruntCateId);
                                 connection.DeleteUnit(Cob_To_Label.Text.ToUpper());
                                 Cob_Units.Items.Clear();
                                 Reader();
@@ -228,11 +234,11 @@ namespace Converter_DesktopApp_Sql_Database
                 }
             }
         }
-        private (string, (string UnitName, int CateId, string Value)[]) BackupAction(string CateName, int currantCateId)
+        private (string, List<string[]>, string) BackupAction(string CateName, int currantCateId)
         {
             string currantCateName = CateName;
-            (string UnitName, int CateId, string Value)[] unitsDetails = UnitsList.Where(cateId => cateId.CateId == currantCateId).Select(i => (i.UnitName, i.CateId, i.Value)).ToArray();
-            return (currantCateName, unitsDetails);
+            List<string[]> unitsDetails = UnitsList.Where(cateId => cateId.CateId == currantCateId).Select(i => new[] { i.UnitName, i.CateId.ToString(), i.Value }).ToList();
+            return (currantCateName, unitsDetails, Cob_To_Label.Text.ToUpper());
         }
         private void Edit_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -248,45 +254,47 @@ namespace Converter_DesktopApp_Sql_Database
                 confirmationMessage.Content = "";
             }
         }
-    private void EditAction(string CurrantCateName)
-    {
-        int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
-        if (CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(CurrantCateName))
+        private void EditAction(string CurrantCateName)
         {
-            if (UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
+            int curruntCateId = CategoriesList.Where(cateName => cateName.CateName == CurrantCateName).Select(cateId => cateId.CateId).FirstOrDefault();
+            if (CategoriesList.Select(cateName => cateName.CateName).ToArray().Contains(CurrantCateName))
             {
-                if (UnitsList.Where(unitName => unitName.UnitName == Cob_To_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault() == curruntCateId)
+                if (UnitsList.Select(cateName => cateName.UnitName).ToArray().Contains(Cob_To_Label.Text.ToUpper()))
                 {
-                    connection.EditValue(Cob_To_Label.Text.ToUpper(), curruntCateId);
-                    Cob_Units.Items.Clear();
-                    Reader();
-                    confirmationMessage.Content = "Update DataBase is Done!";
-                    _ = MessageBox.Show($" The Value of '{Cob_To_Label.Text.ToUpper()}' Unit under '{CurrantCateName}' Categoty has been updated Successfully", "Converter");
-                    Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
-                    confirmationMessage.Content = "";
+                    if (UnitsList.Where(unitName => unitName.UnitName == Cob_To_Label.Text.ToUpper()).Select(cateId => cateId.CateId).FirstOrDefault() == curruntCateId)
+                    {
+                        (LastCateName, RelatedUnitsList, CurrantUnitName) = BackupAction(CurrantCateName, curruntCateId);
+                        connection.EditValue(Cob_To_Label.Text.ToUpper(), Input_Value.Text);
+                        Cob_Units.Items.Clear();
+                        Reader();
+                        confirmationMessage.Content = "Update DataBase is Done!";
+                        _ = MessageBox.Show($" The Value of '{Cob_To_Label.Text.ToUpper()}' Unit under '{CurrantCateName}' Categoty has been updated Successfully", "Converter");
+                        Cob_Unit_Label.Text = Cob_To_Label.Text = Input_Value.Text = "";
+                        confirmationMessage.Content = "";
+                        ActionName = "UpdateValue";
+                    }
+                    else
+                    {
+                        confirmationMessage.Content = "Check Your Inputs, Please!";
+                        _ = MessageBox.Show($"{Cob_To_Label.Text.ToUpper()} is Not under {CurrantCateName} Category, Check your inputs, please!", "Converter");
+                        confirmationMessage.Content = "";
+                    }
                 }
                 else
                 {
-                    confirmationMessage.Content = "Check Your Inputs, Please!";
-                    _ = MessageBox.Show($"{Cob_To_Label.Text.ToUpper()} is Not under {CurrantCateName} Category, Check your inputs, please!", "Converter");
+                    confirmationMessage.Content = "The Unit is Not under the Category!";
+                    _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' is NOT exist in the Unit list, please check your inputs!", "Converter");
                     confirmationMessage.Content = "";
                 }
             }
             else
             {
-                confirmationMessage.Content = "The Unit is Not under the Category!";
-                _ = MessageBox.Show($"'{Cob_To_Label.Text.ToUpper()}' is NOT exist in the Unit list, please check your inputs!", "Converter");
+                confirmationMessage.Content = "Category is Not exist in DataBase!";
+                _ = MessageBox.Show($"'{CurrantCateName}' is NOT exist in Category List, please check your inputs!", "Converter");
                 confirmationMessage.Content = "";
             }
+
         }
-        else
-        {
-            confirmationMessage.Content = "Category is Not exist in DataBase!";
-            _ = MessageBox.Show($"'{CurrantCateName}' is NOT exist in Category List, please check your inputs!", "Converter");
-            confirmationMessage.Content = "";
-        }
-           
-    }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             string cateName = CategoriesList[Cob_Units.SelectedIndex].CateName;
@@ -349,29 +357,46 @@ namespace Converter_DesktopApp_Sql_Database
             int newUnitId = UnitsList.Select(unitId => unitId.UnitId).ToArray().Max();
             switch (ActionName)
             {
-                
+                case "AddCategory":
+                    {
+                        connection.DeleteCategory(LastCateName, newCateId);
+                    }; break;
+
+                case "AddonlyUnit":
+                    {
+                        connection.DeleteUnit(CurrantUnitName);
+                    }; break;
+
+                case "UpdateValue":
+                    {
+                        string te = RelatedUnitsList.Select(i => i).Where(i => i[0] == CurrantUnitName).ToString();
+                        List<string[]> currantUnitDetails = RelatedUnitsList.Select(i => i).Select(j => j).Where(m => m[0] == CurrantUnitName).ToList();
+                        connection.EditValue(currantUnitDetails[0][0], currantUnitDetails[0][2]);
+                    }; break;
+
                 case "deleteAllCategory":
                     {
                         connection.InsertCategory(newCateId, LastCateName);
-                        for (int i = 0; i < RelatedUnitsList.Length; i++)
+                        for (int i = 0; i < RelatedUnitsList.Count; i++)
                         {
-                            var (unitName, cateId, value) = RelatedUnitsList[i];
-                            connection.InsertUnit(newUnitId, unitName, newCateId + 1, value);
+                            connection.InsertUnit(newUnitId, RelatedUnitsList[i][0], newCateId + 1, RelatedUnitsList[i][2]);
                         }
                     }; break;
 
                 case "deleteOnlyUnit":
                     {
-                        var (unitName, cateId, value) = RelatedUnitsList[0];
-                        connection.InsertUnit(newUnitId, unitName, cateId, value);
+                        connection.InsertUnit(newUnitId, RelatedUnitsList[0][0], Convert.ToInt32(RelatedUnitsList[0][1]), RelatedUnitsList[0][2]);
                     }; break;
+                default:
+                    break;
             }
-            RelatedUnitsList.Select(i => (i.UnitName, i.CateId, i.Value)).ToList().Clear();
             Cob_Units.Items.Clear();
             Reader();
             confirmationMessage.Content = "Undo is done!";
             _ = MessageBox.Show($"Undo the process is done!", "Converter");
             confirmationMessage.Content = "";
+            RelatedUnitsList.Clear();
+
         }
     }
 }

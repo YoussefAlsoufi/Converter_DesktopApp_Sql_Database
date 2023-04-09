@@ -49,10 +49,10 @@ namespace Converter_DesktopApp_Sql_Database
             _ = deleteUnit.ExecuteNonQuery();
             connection.Close();
         }
-        public void EditValue(string unitName, int cateId)
+        public void EditValue(string unitName, string value)
         {
             connection.Open();
-            SqlCommand editValue = new($"UPDATE dbo.UNITS SET VALUE = 1000 WHERE UNIT_NAME = '{unitName}' AND CATE_ID = {cateId}; ", connection);
+            SqlCommand editValue = new($"UPDATE dbo.UNITS SET VALUE = {value} WHERE UNIT_NAME = '{unitName}' ", connection);
             _ = editValue.ExecuteNonQuery();
             connection.Close();
         }
